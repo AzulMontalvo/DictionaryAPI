@@ -1,0 +1,112 @@
+# ===================
+# Visual Studio
+# ===================
+.vs/
+*.csproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# ===================
+# Build results
+# ===================
+bin/
+obj/
+out/
+artifacts/
+publish/
+
+# ===================
+# Configuration files (secrets & environment specific)
+# ===================
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.*.local.json
+
+# ===================
+# User Secrets (local development)
+# ===================
+secrets.json
+%APPDATA%\Microsoft\UserSecrets\
+~/.microsoft/usersecrets/
+
+# ===================
+# Database files
+# ===================
+*.db
+*.sqlite
+*.sqlite3
+*.mdf
+*.ldf
+*.sdf
+
+# ===================
+# Logs & temporary files
+# ===================
+logs/
+*.log
+*.tmp
+*.temp
+*.cache
+*.bak
+
+# ===================
+# Environment variables
+# ===================
+.env
+.env.*
+!.env.example
+
+# ===================
+# IDE & Editor files
+# ===================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===================
+# Test results
+# ===================
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# ===================
+# Package dependencies
+# ===================
+packages/
+*.nupkg
+*.snupkg
+
+# ===================
+# Azure Functions / AWS Lambda
+# ===================
+local.settings.json
+.aws-sam/
+
+# ===================
+# Diagnostic files
+# ===================
+*.pid
+*.seed
+*.pid.lock
+
+# ===================
+# Miscellaneous
+# ===================
+*.heapsnapshot
+*.heapsnapshot.user
