@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using DictionaryAPI.Models.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace DictionaryAPI.Data
 {
@@ -6,10 +7,11 @@ namespace DictionaryAPI.Data
     {
         public static async Task SeedUsersAsync(
             RoleManager<IdentityRole> roleManager,
-            UserManager<IdentityUser> userManager)
+            UserManager<AppUser> userManager,
+            ApplicationDbContext context)
         {
             //Seed de roles
-            string[] roleNames = { "Administrador", "Usuario" };
+            string[] roleNames = { "Admin", "User" };
             foreach (var roleName in roleNames)
             {
                 var roleExist = await roleManager.RoleExistsAsync(roleName);
@@ -28,7 +30,7 @@ namespace DictionaryAPI.Data
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
-                var newAdmin = new IdentityUser
+                var newAdmin = new AppUser  
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
@@ -38,7 +40,7 @@ namespace DictionaryAPI.Data
                 IdentityResult createAdminResult = await userManager.CreateAsync(newAdmin, adminPassword);
                 if (createAdminResult.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(newAdmin, "Administrador");
+                    await userManager.AddToRoleAsync(newAdmin, "Admin");
                 }
             }
 
@@ -49,7 +51,7 @@ namespace DictionaryAPI.Data
             var user = await userManager.FindByEmailAsync(userEmail);
             if (user == null)
             {
-                var newUser = new IdentityUser
+                var newUser = new AppUser
                 {
                     UserName = userEmail,
                     Email = userEmail,
@@ -59,7 +61,24 @@ namespace DictionaryAPI.Data
                 IdentityResult createUserResult = await userManager.CreateAsync(newUser, userPassword);
                 if (createUserResult.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(newUser, "Usuario");
+                    await userManager.AddToRoleAsync(newUser, "User");
+                }
+            }
+
+            //Seed de catálogo de statusId
+            if (!context.SubmissionStatus.Any())
+            {
+                context.SubmissionStatus.AddRange(
+                    new Models.Entities.SubmissionStatus { Name = "Pending", Description = "The submission is awaiting review." },
+                    new Models.Entities.SubmissionStatus { Name = "Approved", Description = "The submission has been approved and is now part of the dictionary." },
+                    new Models.Entities.SubmissionStatus { Name = "Rejected", Description = "The submission has been rejected and will not be added to the dictionary." }
+                );
+                try
+                {
+                    await context.SaveChangesAsync();
+                } catch ( Exception ex )
+                {
+                    Console.WriteLine($"Error seeding submission status: {ex.Message}");
                 }
             }
         }

@@ -1,6 +1,6 @@
-﻿namespace DictionaryAPI.Models
+﻿namespace DictionaryAPI.Models.Entities
 {
-    public class SubmissionState
+    public class SubmissionStatus
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
