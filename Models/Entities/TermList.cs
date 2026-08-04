@@ -1,7 +1,7 @@
 ﻿using System.Net;
 
-namespace DictionaryAPI.Models;
-public class WordList
+namespace DictionaryAPI.Models.Entities;
+public class TermList
 {
 
     public int WordId { get; set; }

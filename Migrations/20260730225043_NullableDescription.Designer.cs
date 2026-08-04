@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DictionaryAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260607091311_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260730225043_NullableDescription")]
+    partial class NullableDescription
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,105 @@ namespace DictionaryAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DictionaryAPI.Models.List", b =>
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.AppUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.FeaturedList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ListId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListId");
+
+                    b.ToTable("FeaturedLists");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.List", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -35,6 +133,12 @@ namespace DictionaryAPI.Migrations
 
                     b.Property<DateTime?>("CreationDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -52,13 +156,16 @@ namespace DictionaryAPI.Migrations
                     b.ToTable("Lists");
                 });
 
-            modelBuilder.Entity("DictionaryAPI.Models.Submission", b =>
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.Submission", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("CreationDate")
                         .HasColumnType("datetime2");
@@ -67,12 +174,23 @@ namespace DictionaryAPI.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<string>("Etymology")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Example")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("ExtraInformation")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("StateIdId")
+                    b.Property<int>("StatusId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -85,14 +203,14 @@ namespace DictionaryAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StateIdId");
+                    b.HasIndex("StatusId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Submissions");
                 });
 
-            modelBuilder.Entity("DictionaryAPI.Models.SubmissionState", b =>
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.SubmissionStatus", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -111,10 +229,10 @@ namespace DictionaryAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SubmissionStates");
+                    b.ToTable("SubmissionStatus");
                 });
 
-            modelBuilder.Entity("DictionaryAPI.Models.Term", b =>
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.Tag", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -122,29 +240,68 @@ namespace DictionaryAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tag");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.Term", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("CreationDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Definition")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .UseCollation("Modern_Spanish_CI_AI");
+
+                    b.Property<string>("Etymology")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Example")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ExtraInformation")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VideoUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Word")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .UseCollation("Modern_Spanish_CI_AI");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Words");
+                    b.ToTable("Terms");
                 });
 
-            modelBuilder.Entity("DictionaryAPI.Models.WordList", b =>
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.TermList", b =>
                 {
                     b.Property<int>("WordId")
                         .HasColumnType("int");
@@ -159,7 +316,48 @@ namespace DictionaryAPI.Migrations
 
                     b.HasIndex("ListId");
 
-                    b.ToTable("WordLists");
+                    b.ToTable("TermLists");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.TermRelation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RelatedWordId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelationType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WordId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RelatedWordId");
+
+                    b.HasIndex("WordId");
+
+                    b.ToTable("TermRelation");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.TermTag", b =>
+                {
+                    b.Property<int>("WordId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("int");
+
+                    b.HasKey("WordId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("TermTag");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -212,71 +410,6 @@ namespace DictionaryAPI.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -360,51 +493,100 @@ namespace DictionaryAPI.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DictionaryAPI.Models.List", b =>
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.FeaturedList", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                    b.HasOne("DictionaryAPI.Models.Entities.List", "List")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DictionaryAPI.Models.Submission", b =>
-                {
-                    b.HasOne("DictionaryAPI.Models.SubmissionState", "StateId")
-                        .WithMany("Submissions")
-                        .HasForeignKey("StateIdId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("StateId");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DictionaryAPI.Models.WordList", b =>
-                {
-                    b.HasOne("DictionaryAPI.Models.List", "List")
-                        .WithMany("WordLists")
                         .HasForeignKey("ListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DictionaryAPI.Models.Term", "Word")
-                        .WithMany("WordLists")
+                    b.Navigation("List");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.List", b =>
+                {
+                    b.HasOne("DictionaryAPI.Models.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.Submission", b =>
+                {
+                    b.HasOne("DictionaryAPI.Models.Entities.SubmissionStatus", "Status")
+                        .WithMany("Submissions")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DictionaryAPI.Models.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Status");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.TermList", b =>
+                {
+                    b.HasOne("DictionaryAPI.Models.Entities.List", "List")
+                        .WithMany("TermLists")
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DictionaryAPI.Models.Entities.Term", "Word")
+                        .WithMany("TermLists")
                         .HasForeignKey("WordId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("List");
+
+                    b.Navigation("Word");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.TermRelation", b =>
+                {
+                    b.HasOne("DictionaryAPI.Models.Entities.Term", "RelatedWord")
+                        .WithMany("IncomingTermRelations")
+                        .HasForeignKey("RelatedWordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DictionaryAPI.Models.Entities.Term", "Word")
+                        .WithMany("OutgoingTermRelations")
+                        .HasForeignKey("WordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("RelatedWord");
+
+                    b.Navigation("Word");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.TermTag", b =>
+                {
+                    b.HasOne("DictionaryAPI.Models.Entities.Tag", "Tag")
+                        .WithMany("TermTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DictionaryAPI.Models.Entities.Term", "Word")
+                        .WithMany("TermTags")
+                        .HasForeignKey("WordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tag");
 
                     b.Navigation("Word");
                 });
@@ -420,7 +602,7 @@ namespace DictionaryAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("DictionaryAPI.Models.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -429,7 +611,7 @@ namespace DictionaryAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("DictionaryAPI.Models.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -444,7 +626,7 @@ namespace DictionaryAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("DictionaryAPI.Models.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -453,26 +635,37 @@ namespace DictionaryAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("DictionaryAPI.Models.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DictionaryAPI.Models.List", b =>
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.List", b =>
                 {
-                    b.Navigation("WordLists");
+                    b.Navigation("TermLists");
                 });
 
-            modelBuilder.Entity("DictionaryAPI.Models.SubmissionState", b =>
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.SubmissionStatus", b =>
                 {
                     b.Navigation("Submissions");
                 });
 
-            modelBuilder.Entity("DictionaryAPI.Models.Term", b =>
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.Tag", b =>
                 {
-                    b.Navigation("WordLists");
+                    b.Navigation("TermTags");
+                });
+
+            modelBuilder.Entity("DictionaryAPI.Models.Entities.Term", b =>
+                {
+                    b.Navigation("IncomingTermRelations");
+
+                    b.Navigation("OutgoingTermRelations");
+
+                    b.Navigation("TermLists");
+
+                    b.Navigation("TermTags");
                 });
 #pragma warning restore 612, 618
         }

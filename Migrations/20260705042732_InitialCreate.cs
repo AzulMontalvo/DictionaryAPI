@@ -30,6 +30,8 @@ namespace DictionaryAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -51,7 +53,7 @@ namespace DictionaryAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SubmissionStates",
+                name: "SubmissionStatus",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -61,23 +63,42 @@ namespace DictionaryAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SubmissionStates", x => x.Id);
+                    table.PrimaryKey("PK_SubmissionStatus", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Words",
+                name: "Tag",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Word = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Definition = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    ExtraInformation = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Words", x => x.Id);
+                    table.PrimaryKey("PK_Tag", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Terms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Word = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false, collation: "Modern_Spanish_CI_AI"),
+                    Definition = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false, collation: "Modern_Spanish_CI_AI"),
+                    ExtraInformation = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Example = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Etymology = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsVisible = table.Column<bool>(type: "bit", nullable: false),
+                    VideoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Terms", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -217,8 +238,12 @@ namespace DictionaryAPI.Migrations
                     Word = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Definition = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                     ExtraInformation = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Example = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Etymology = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Category = table.Column<int>(type: "int", nullable: false),
                     CreationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    StateIdId = table.Column<int>(type: "int", nullable: false)
+                    StatusId = table.Column<int>(type: "int", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -230,15 +255,66 @@ namespace DictionaryAPI.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Submissions_SubmissionStates_StateIdId",
-                        column: x => x.StateIdId,
-                        principalTable: "SubmissionStates",
+                        name: "FK_Submissions_SubmissionStatus_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "SubmissionStatus",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "WordLists",
+                name: "TermRelation",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    WordId = table.Column<int>(type: "int", nullable: false),
+                    RelatedWordId = table.Column<int>(type: "int", nullable: false),
+                    RelationType = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TermRelation", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TermRelation_Terms_RelatedWordId",
+                        column: x => x.RelatedWordId,
+                        principalTable: "Terms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TermRelation_Terms_WordId",
+                        column: x => x.WordId,
+                        principalTable: "Terms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TermTag",
+                columns: table => new
+                {
+                    WordId = table.Column<int>(type: "int", nullable: false),
+                    TagId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TermTag", x => new { x.WordId, x.TagId });
+                    table.ForeignKey(
+                        name: "FK_TermTag_Tag_TagId",
+                        column: x => x.TagId,
+                        principalTable: "Tag",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TermTag_Terms_WordId",
+                        column: x => x.WordId,
+                        principalTable: "Terms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TermLists",
                 columns: table => new
                 {
                     WordId = table.Column<int>(type: "int", nullable: false),
@@ -247,17 +323,17 @@ namespace DictionaryAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WordLists", x => new { x.WordId, x.ListId });
+                    table.PrimaryKey("PK_TermLists", x => new { x.WordId, x.ListId });
                     table.ForeignKey(
-                        name: "FK_WordLists_Lists_ListId",
+                        name: "FK_TermLists_Lists_ListId",
                         column: x => x.ListId,
                         principalTable: "Lists",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WordLists_Words_WordId",
+                        name: "FK_TermLists_Terms_WordId",
                         column: x => x.WordId,
-                        principalTable: "Words",
+                        principalTable: "Terms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -307,9 +383,9 @@ namespace DictionaryAPI.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Submissions_StateIdId",
+                name: "IX_Submissions_StatusId",
                 table: "Submissions",
-                column: "StateIdId");
+                column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_UserId",
@@ -317,9 +393,24 @@ namespace DictionaryAPI.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WordLists_ListId",
-                table: "WordLists",
+                name: "IX_TermLists_ListId",
+                table: "TermLists",
                 column: "ListId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TermRelation_RelatedWordId",
+                table: "TermRelation",
+                column: "RelatedWordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TermRelation_WordId",
+                table: "TermRelation",
+                column: "WordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TermTag_TagId",
+                table: "TermTag",
+                column: "TagId");
         }
 
         /// <inheritdoc />
@@ -344,19 +435,28 @@ namespace DictionaryAPI.Migrations
                 name: "Submissions");
 
             migrationBuilder.DropTable(
-                name: "WordLists");
+                name: "TermLists");
+
+            migrationBuilder.DropTable(
+                name: "TermRelation");
+
+            migrationBuilder.DropTable(
+                name: "TermTag");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "SubmissionStates");
+                name: "SubmissionStatus");
 
             migrationBuilder.DropTable(
                 name: "Lists");
 
             migrationBuilder.DropTable(
-                name: "Words");
+                name: "Tag");
+
+            migrationBuilder.DropTable(
+                name: "Terms");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
