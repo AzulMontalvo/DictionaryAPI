@@ -2,6 +2,7 @@
 using DictionaryAPI.Models.DTOs.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -19,16 +20,33 @@ namespace DictionaryAPI.Controllers
             _authService = authService;
         }
 
+        //Helper method
+        private void SetRefreshTokenCookie(string refreshToken, DateTime expiry)
+        {
+            Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = new DateTimeOffset(expiry)
+            });
+        }
+
         //Register
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto request)
         {
             var result = await _authService.RegisterAsync(request);
-            
-            if (!result.Success)
-                return BadRequest(new { errors = result.Errors });
+            if (!result.Success) return BadRequest(new { errors = result.Errors });
 
-            return Ok(result.Tokens);
+            SetRefreshTokenCookie(result.Tokens!.RefreshToken, result.Tokens.RefreshTokenExpiry);
+            return Ok(new
+            {
+                result.Tokens.Token,
+                result.Tokens.Expiration,
+                result.Tokens.Roles,
+                result.Tokens.UserName
+            });
         }
 
         //Login
@@ -36,9 +54,16 @@ namespace DictionaryAPI.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
             var result = await _authService.LoginAsync(request);
-            if (!result.Success)
-                return Unauthorized(new { message = result.Error });
-            return Ok(result.Tokens);
+            if (!result.Success) return Unauthorized(new { message = result.Error });
+
+            SetRefreshTokenCookie(result.Tokens!.RefreshToken, result.Tokens.RefreshTokenExpiry);
+            return Ok(new
+            {
+                result.Tokens.Token,
+                result.Tokens.Expiration,
+                result.Tokens.Roles,
+                result.Tokens.UserName
+            });
         }
 
         //Confirm email
@@ -59,9 +84,25 @@ namespace DictionaryAPI.Controllers
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto request)
         {
-            var result = await _authService.RefreshTokenAsync(request);
-            if (result == null) return Unauthorized("Invalid token");
-            return Ok(result);
+            var refreshToken = Request.Cookies["refresh_token"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return Unauthorized(new { message = "No hay sesión activa." });
+
+            var tokens = await _authService.RefreshTokenAsync(refreshToken);
+            if (tokens is null)
+            {
+                Response.Cookies.Delete("refresh_token");
+                return Unauthorized(new { message = "Sesión expirada." });
+            }
+
+            SetRefreshTokenCookie(tokens.RefreshToken, tokens.RefreshTokenExpiry);
+            return Ok(new
+            {
+                tokens.Token,
+                tokens.Expiration,
+                tokens.Roles,
+                tokens.UserName
+            });
         }
 
         //Revoke Token for Logout
@@ -70,8 +111,11 @@ namespace DictionaryAPI.Controllers
         public async Task<IActionResult> RevokeToken()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized();
+            if (userId is null) return Unauthorized();
+
             await _authService.RevokeTokenAsync(userId);
+            Response.Cookies.Delete("refresh_token");
+
             return NoContent();
         }
 
