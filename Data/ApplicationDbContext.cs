@@ -16,6 +16,11 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<AppUser>(entity =>
+        {
+            entity.Property(u => u.UserName).HasMaxLength(30);
+        });
+
         builder.Entity<Term>(entity =>
         {
             entity.Property(w => w.Word).HasMaxLength(100).UseCollation("Modern_Spanish_CI_AI");

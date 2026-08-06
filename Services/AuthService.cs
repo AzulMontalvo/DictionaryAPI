@@ -2,6 +2,7 @@
 using DictionaryAPI.Models.DTOs.Auth;
 using DictionaryAPI.Models.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -92,16 +93,13 @@ namespace DictionaryAPI.Services
         }
 
         //Refresh Token
-        public async Task<AuthResponseDto?> RefreshTokenAsync(RefreshTokenDto request)
+        public async Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken)
         {
-            var principal = GetPrincipalFromExpiredToken(request.Token);
-            if (principal == null) return null;
+            var user = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken
+                                           && u.RefreshTokenExpiryTime > DateTime.UtcNow);
 
-            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _userManager.FindByIdAsync(userId!);
-
-            if (user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
-                return null;
+            if (user is null) return null;
 
             return await GenerateJwtTokenAsync(user);
         }
@@ -121,19 +119,20 @@ namespace DictionaryAPI.Services
         private async Task<AuthResponseDto> GenerateJwtTokenAsync(AppUser user)
         {
             var expiry = DateTime.UtcNow.AddMinutes(
-                _configuration.GetValue<int>("Jwt:DurationInMinutes"));
+                    _configuration.GetValue<int>("Jwt:DurationInMinutes"));
+
+            var refreshTokenExpiry = DateTime.UtcNow.AddDays(
+                _configuration.GetValue<int>("Jwt:DurationInDays"));
 
             var roles = await _userManager.GetRolesAsync(user);
-
             var accessToken = GenerateJwtToken(user, expiry, roles);
             var refreshToken = GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(
-                _configuration.GetValue<int>("Jwt:DurationInDays"));
-
+            user.RefreshTokenExpiryTime = refreshTokenExpiry;
             await _userManager.UpdateAsync(user);
-            return new AuthResponseDto(Token: accessToken, RefreshToken: refreshToken, Expiration: expiry, roles, user.UserName!);
+
+            return new AuthResponseDto(accessToken, refreshToken, expiry, roles, user.UserName!, refreshTokenExpiry);
         }
 
         private string GenerateJwtToken(AppUser user, DateTime expiry, IList<string> roles)

@@ -110,9 +110,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("PermitirTodo",
     policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowCredentials();
     });
 });
 
