@@ -8,7 +8,7 @@ namespace DictionaryAPI.Interfaces
         Task<RegisterResponseDto> RegisterAsync(RegisterDto request);
         Task<LoginResponseDto> LoginAsync(LoginDto request);
         Task<bool> ConfirmEmailAsync(string userId, string token);
-        Task<AuthResponseDto?> RefreshTokenAsync(RefreshTokenDto request);
+        Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken);
         Task RevokeTokenAsync(string userId);
     }
 }

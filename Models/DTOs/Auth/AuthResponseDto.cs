@@ -6,6 +6,7 @@
         string RefreshToken,
         DateTime Expiration,
         IList<string> Roles,
-        string UserName
+        string UserName,
+        DateTime RefreshTokenExpiry
         );
 }
