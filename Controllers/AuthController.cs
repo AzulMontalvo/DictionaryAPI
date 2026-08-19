@@ -80,6 +80,14 @@ namespace DictionaryAPI.Controllers
                 : BadRequest(new { message = "El enlace no es válido o expiró." });
         }
 
+        [HttpPost("resend-confirmation")]
+        public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationDto request)
+        {
+            await _authService.ResendConfirmationEmailAsync(request.Email);
+
+            return Ok(new { message = "Si el correo existe y no está confirmado, recibirás un nuevo enlace." });
+        }
+
         //Refresh Token
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto request)
