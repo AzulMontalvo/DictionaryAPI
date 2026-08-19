@@ -70,7 +70,6 @@ logs/
 # IDE & Editor files
 # ===================
 .idea/
-.vscode/
 *.swp
 *.swo
 *~
@@ -112,3 +111,7 @@ local.settings.json
 # ===================
 *.heapsnapshot
 *.heapsnapshot.user
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
