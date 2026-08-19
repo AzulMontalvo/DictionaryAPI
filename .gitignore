@@ -60,8 +60,6 @@ logs/
 # ===================
 # Environment variables
 # ===================
-.env
-.env.*
 !.env.example
 *.pem
 *.key
@@ -110,3 +108,5 @@ local.settings.json
 # Miscellaneous
 # ===================
 *.heapsnapshot
+config.bat
+node_modules

@@ -92,6 +92,28 @@ namespace DictionaryAPI.Services
             return result.Succeeded;
         }
 
+        public async Task<bool> ResendConfirmationEmailAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null || user.EmailConfirmed) return false;
+
+            try
+            {
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var encodedToken = Uri.EscapeDataString(token);
+                var frontendUrl = _configuration["App:FrontendUrl"];
+                var confirmationLink = $"{frontendUrl}/confirm-email?userId={user.Id}&token={encodedToken}&email={Uri.EscapeDataString(user.Email!)}";
+
+                await _emailService.SendEmailConfirmationAsync(user.Email!, user.UserName!, confirmationLink);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reenviando email: {ex.Message}");
+                return false;
+            }
+        }
+
         //Refresh Token
         public async Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken)
         {

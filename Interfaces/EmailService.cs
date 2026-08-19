@@ -24,19 +24,35 @@ public class EmailService : IEmailService
         message.Body = new TextPart("html")
         {
             Text = $"""
-                <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-                  <h2>Bienvenido, {userName}</h2>
-                  <p>Confirma tu correo electrónico para activar tu cuenta:</p>
-                  <a href="{confirmationLink}"
-                     style="display: inline-block; padding: 0.75rem 1.5rem;
-                            background: #6366f1; color: white; border-radius: 8px;
-                            text-decoration: none; font-weight: 500;">
-                    Confirmar correo
-                  </a>
-                  <p style="margin-top: 1rem; color: #6b7280; font-size: 0.875rem;">
-                    Si no creaste esta cuenta, ignora este mensaje.
-                  </p>
-                </div>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;">
+              <tr>
+                <td align="center" style="padding:20px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#ffffff; border-radius:8px;">
+                    <tr>
+                      <td style="padding:30px 20px;">
+                        <h2 style="font-size:24px; color:#222222; margin-bottom:16px; font-weight:700;  text-align: center;">
+                          ¡Te damos la bienvenida, {userName}!
+                        </h2>
+                        <p style="font-size:16px; color:#474744; margin-bottom:16px; line-height:1.6;">
+                          Confirma tu correo electrónico para activar tu cuenta de VerboCulto y ser parte de la comunidad:
+                        </p>
+                        <p style="margin:24px 0 24px 0; text-align:center;">                                
+                            <a href="{confirmationLink}"
+                                style="display:inline-block; background-color:#BF7449; color:#ffffff; text-decoration:none; font-weight:bold; padding:14px 28px; border-radius:8px; font-size:16px;">
+                            Confirmar correo
+                            </a>
+                        </p>
+
+                        <!-- Párrafo 2 -->
+                        <p style="font-size:12px; color:#5555558a; margin-bottom:12px; padding-top: 2rem; line-height:1.6;">
+                          Si no creaste esta cuenta, ignora este mensaje.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
             """
         };
 
