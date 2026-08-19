@@ -70,7 +70,6 @@ logs/
 # IDE & Editor files
 # ===================
 .idea/
-.vscode/
 *.swp
 *.swo
 *~
